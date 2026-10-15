@@ -4,10 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Price Calculator</title>
-  <!-- Supabase JS Client v2 chính thức hỗ trợ publishable key mới -->
+  <!-- Supabase JS Client v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1/dist/umd/supabase.min.js"></script>
   <style>
-    *{box-sizing:border-box}body{margin:0;background:#eef2f5;font-family:Arial,sans-serif;color:#1f2937}.bar{height:8px;background:linear-gradient(90deg,#e20015,#ffb500,#78be20,#00a8e0,#005691,#50237f)}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid #d7dde3;border-radius:8px;box-shadow:0 4px 16px #0001;overflow:hidden}section{padding:20px;border-bottom:1px solid #e5e7eb}h1{font-size:26px;margin:0 0 6px}h2{font-size:16px;margin:0 0 14px}.sub,.meta{font-size:12px;color:#66717e}.rates{display:grid;grid-template-columns:repeat(4,1fr);max-width:640px;border:1px solid #7b8794}.rate{border-right:1px solid #7b8794}.rate:last-child{border:0}.rate label{display:block;padding:7px 10px;background:#edf3f6;font-size:12px;font-weight:bold;border-bottom:1px solid #7b8794}.rate input{width:100%;border:0;padding:10px;text-align:right;background:#eef1f3;color:#59636f}.grid{display:grid;grid-template-columns:repeat(3,1fr) 130px 130px;gap:12px}.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:6px;min-height:28px}.field input,.field select{width:100%;height:42px;border:1px solid #8f9aa6;border-radius:3px;padding:0 10px;font-size:15px}.price{background:#e7e5d2}.source{outline:3px solid #007bc055;outline-offset:-3px;background:#fff}.formula{font-size:11px;color:#66717e;margin-top:5px}.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}button{height:42px;border:0;border-radius:3px;padding:0 20px;background:#007bc0;color:#fff;font-weight:bold;cursor:pointer}.secondary{background:#64717d}.output-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.output-row .field{width:180px}.output-row #reset{margin-left:auto;min-width:110px}.msg{display:none;margin-top:12px;padding:10px;border-radius:4px;font-size:13px}.msg.ok{display:block;background:#edf9f2;color:#146c3b}.msg.err{display:block;background:#fff1f2;color:#a31224}.results{display:none}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aab3bd;padding:9px;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#edf3f6;font-size:12px}.yellow{background:#fff200;font-weight:bold}.modalbg{display:none;position:fixed;inset:0;background:#0f172a99;z-index:10;align-items:center;justify-content:center;padding:16px}.modalbg.open{display:flex}.modal{width:min(680px,100%);background:#fff;border-radius:8px;overflow:hidden}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #ddd}.modalbody{padding:20px}.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.close{background:transparent;color:#333;font-size:24px;padding:0;width:35px}.expired{color:#b42318;font-weight:bold}@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.rates{grid-template-columns:1fr 1fr}.modalgrid{grid-template-columns:1fr}}@media(max-width:520px){.grid,.rates{grid-template-columns:1fr}.output-row .field{width:calc(100% - 130px)}}
+    *{box-sizing:border-box}body{margin:0;background:#eef2f5;font-family:Arial,sans-serif;color:#1f2937}.bar{height:8px;background:linear-gradient(90deg,#e20015,#ffb500,#78be20,#00a8e0,#005691,#50237f)}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid #d7dde3;border-radius:8px;box-shadow:0 4px 16px #0001;overflow:hidden}section{padding:20px;border-bottom:1px solid #e5e7eb}h1{font-size:26px;margin:0 0 6px}h2{font-size:16px;margin:0 0 14px}.sub,.meta{font-size:12px;color:#66717e}.rates{display:grid;grid-template-columns:repeat(4,1fr);max-width:640px;border:1px solid #7b8794}.rate{border-right:1px solid #7b8794}.rate:last-child{border:0}.rate label{display:block;padding:7px 10px;background:#edf3f6;font-size:12px;font-weight:bold;border-bottom:1px solid #7b8794}.rate input{width:100%;border:0;padding:10px;text-align:right;background:#eef1f3;color:#59636f}.grid{display:grid;grid-template-columns:repeat(3,1fr) 130px 130px;gap:12px}.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:6px;min-height:28px}.field input,.field select{width:100%;height:42px;border:1px solid #8f9aa6;border-radius:3px;padding:0 10px;font-size:15px}.price{background:#e7e5d2}.source{outline:3px solid #007bc055;outline-offset:-3px;background:#fff}.formula{font-size:11px;color:#66717e;margin-top:5px}.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}button{height:42px;border:0;border-radius:3px;padding:0 20px;background:#007bc0;color:#fff;font-weight:bold;cursor:pointer}.secondary{background:#64717d}.output-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.output-row .field{width:180px}.output-row #reset{margin-left:auto;min-width:110px}.msg{display:none;margin-top:12px;padding:10px;border-radius:4px;font-size:13px}.msg.ok{display:block;background:#edf9f2;color:#146c3b}.msg.err{display:block;background:#fff1f2;color:#a31224}.results{display:none}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aab3bd;padding:9px;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#edf3f6;font-size:12px}.yellow{background:#fff200;font-weight:bold}.modalbg{display:none;position:fixed;inset:0;background:#0f172a99;z-index:10;align-items:center;justify-content:center;padding:16px}.modalbg.open{display:flex}.modal{width:min(680px,100%);background:#fff;border-radius:8px;overflow:hidden}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #ddd}.modalbody{padding:20px}.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.close{background:transparent;color:#333;font-size:24px;padding:0;width:35px}.expired{color:#b42318;font-weight:bold}
+    
+    /* Style bổ sung cho bảng Modal Lịch sử cuộn được */
+    .history-modal{width:min(860px,100%)}
+    .history-scroll{max-height:400px;overflow-y:auto;border:1px solid #aab3bd;margin-top:10px}
+    .history-scroll table{margin:0;border:0}
+    .history-scroll th{position:sticky;top:0;background:#edf3f6;z-index:2;box-shadow:inset 0 -1px 0 #aab3bd}
+    .history-scroll td{font-size:13px}
+
+    @media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.rates{grid-template-columns:1fr 1fr}.modalgrid{grid-template-columns:1fr}}@media(max-width:520px){.grid,.rates{grid-template-columns:1fr}.output-row .field{width:calc(100% - 130px)}}
   </style>
 </head>
 <body>
@@ -26,6 +35,7 @@
       </div>
       <div class="tools">
         <button id="updateRates">Update exchange rate</button>
+        <button class="secondary" id="viewHistory">History</button>
         <span class="meta" id="rateMeta">Đang tải dữ liệu...</span>
       </div>
       <div id="message" class="msg"></div>
@@ -52,17 +62,19 @@
         <div class="field">
           <label>Input Currency</label>
           <select id="inputCur">
-            <option>EUR</option>
-            <option>USD</option>
-            <option>CNY</option>
-            <option>JPY</option>
+            <option value=""></option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="CNY">CNY</option>
+            <option value="JPY">JPY</option>
           </select>
         </div>
         <div class="field">
           <label>CP? (Y/N)</label>
           <select id="cp">
-            <option>N</option>
-            <option>Y</option>
+            <option value=""></option>
+            <option value="N">N</option>
+            <option value="Y">Y</option>
           </select>
         </div>
       </div>
@@ -74,10 +86,11 @@
         <div class="field">
           <label>Result Currency</label>
           <select id="outputCur">
-            <option>EUR</option>
-            <option>USD</option>
-            <option>CNY</option>
-            <option>JPY</option>
+            <option value=""></option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="CNY">CNY</option>
+            <option value="JPY">JPY</option>
           </select>
         </div>
         <button class="secondary" id="reset">Reset</button>
@@ -117,6 +130,7 @@
   </div>
 </main>
 
+<!-- MODAL CẬP NHẬT TỶ GIÁ -->
 <div class="modalbg" id="modal">
   <div class="modal">
     <div class="modalhead">
@@ -141,8 +155,40 @@
   </div>
 </div>
 
+<!-- MODAL XEM LỊCH SỬ CÓ SCROLL -->
+<div class="modalbg" id="historyModal">
+  <div class="modal history-modal">
+    <div class="modalhead">
+      <h2>Exchange Rate History</h2>
+      <button class="close" id="hx">×</button>
+    </div>
+    <div class="modalbody">
+      <div id="historyMsg" class="meta" style="margin-bottom:8px">Đang tải lịch sử...</div>
+      <div class="history-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:140px">Thời gian lưu</th>
+              <th>Người nhập</th>
+              <th>Valid until</th>
+              <th>USD</th>
+              <th>EURO</th>
+              <th>CNY</th>
+              <th>JPY</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button class="secondary" id="hClose">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-// CẤU HÌNH SUPABASE
+// CẤU HÌNH SUPABASE TRỰC TIẾP
 const SUPABASE_URL = 'https://qdcjaeankotcwqetytte.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_rkSo7xmKMh5ji7ycgRnH7A_yeT91mwl';
 const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
@@ -187,45 +233,39 @@ function modalMsg(t, k) {
 }
 
 function clearModalMsg() {
-  $('modalMsg').className = 'msg';
-  $('modalMsg').textContent = '';
+  $('modalMsg').className = 'msg';$('modalMsg').textContent = '';
 }
 
 function update() {
-  $('gFormula').textContent = 'PPC × ' + factor() + ' (CP=' + $('cp').value + ')';
+  const cpVal = $('cp').value \vert{}\vert{} 'N';$('gFormula').textContent = 'PPC × ' + factor() + ' (CP=' + cpVal + ')';
   fields.forEach(id => $(id).classList.toggle('source', id === source));
-  if (!source || !(sourceValue > 0)) {
-    $('results').style.display = 'none';
+
+  if (!source || !(sourceValue > 0) || !$('inputCur').value || !$('outputCur').value) {$('results').style.display = 'none';
     return;
   }
+
   const r = rates(), eur = sourceValue / r[sourceCurrency];
   const ppcEUR = source === 'g3' ? eur / factor() : source === 'h3' ? eur / 1.06 : eur;
-  const inC = $('inputCur').value, ppc = ppcEUR * r[inC];
-  $('g3').value = n(ppc * factor());
-  $('h3').value = n(ppc * 1.06);
-  $('i3').value = n(ppc);
+  const inC = $('inputCur').value, ppc = ppcEUR * r[inC];$('g3').value = n(ppc * factor());
+  $('h3').value = n(ppc * 1.06);$('i3').value = n(ppc);
   const out = $('outputCur').value, p = ppcEUR * r[out], g = p * factor(), h = p * 1.06;
-  $('rg').textContent = f(g, out);
-  $('rh').textContent = f(h, out);
-  $('ri').textContent = f(p, out);
-  $('rc').textContent = out;
-  $('rg100').textContent = f(g * 100, out);
-  $('rh100').textContent = f(h * 100, out);
-  $('ri100').textContent = f(p * 100, out);
-  $('rc100').textContent = out;
+  $('rg').textContent = f(g, out);$('rh').textContent = f(h, out);
+  $('ri').textContent = f(p, out);$('rc').textContent = out;
+  $('rg100').textContent = f(g * 100, out);$('rh100').textContent = f(h * 100, out);
+  $('ri100').textContent = f(p * 100, out);$('rc100').textContent = out;
   $('results').style.display = 'block';
 }
 
 for (const id of fields) {
   $(id).addEventListener('focus', () => {
     source = id;
-    sourceCurrency = $('inputCur').value;
+    sourceCurrency = $('inputCur').value || 'EUR';
     sourceValue = Number($(id).value) || null;
     update();
   });
   $(id).addEventListener('input', () => {
     source = id;
-    sourceCurrency = $('inputCur').value;
+    sourceCurrency = $('inputCur').value || 'EUR';
     sourceValue = Number($(id).value) || null;
     if (!sourceValue) fields.filter(x => x !== id).forEach(x => $(x).value = '');
     update();
@@ -239,16 +279,21 @@ $('inputCur').addEventListener('change', () => {
   }
   update();
 });
-$('outputCur').addEventListener('change', update);
-$('cp').addEventListener('change', update);
+$('outputCur').addEventListener('change', update);$('cp').addEventListener('change', update);
 
+// NÚT RESET: ĐƯA TẤT CẢ VỀ TRỐNG
 $('reset').onclick = () => {
   fields.forEach(x => {
-    $(x).value = '';
-    $(x).classList.remove('source');
+    $(x).value = '';$(x).classList.remove('source');
   });
+
+  $('inputCur').value = '';
+  $('cp').value = '';$('outputCur').value = '';
+
   source = null;
   sourceValue = null;
+  sourceCurrency = 'EUR';
+  $('gFormula').textContent = 'PPC × 1.3';
   $('results').style.display = 'none';
 };
 
@@ -275,7 +320,7 @@ function meta(data) {
   $('rateTitle').textContent = 'Exchange Rate · Valid until ' + data.valid;
 }
 
-// LẤY DỮ LIỆU MỚI NHẤT DỰA TRÊN THỜI GIAN
+// LẤY DỮ LIỆU TỶ GIÁ MỚI NHẤT
 async function restore() {
   if (!db) {
     $('rateMeta').textContent = 'Không thể tải thư viện kết nối Database.';
@@ -327,18 +372,17 @@ $('updateRates').onclick = () => {
     if (pw !== null) msg('Mật khẩu không đúng.', 'err');
     return;
   }
-  rateCodes.forEach(c => $('e' + c).value = $('rate' + c).value);
-  $('editor').value = '';
-  $('valid').value = '';
+  rateCodes.forEach(c => $('e' + c).value =$('rate' + c).value);
+  $('editor').value = '';$('valid').value = '';
   clearModalMsg();
   $('modal').classList.add('open');
 };
 
 $('x').onclick = closeModal;
 $('cancel').onclick = closeModal;
-$('modal').onclick = e => { if (e.target === $('modal')) closeModal(); };
+$('modal').onclick = e => { if (e.target ===$('modal')) closeModal(); };
 
-// THÊM DÒNG MỚI VÀO SUPABASE
+// LƯU CẬP NHẬT LÊN DATABASE
 $('save').onclick = async () => {
   const editor = $('editor').value.trim();
   const valid = $('valid').value;
@@ -382,6 +426,62 @@ $('save').onclick = async () => {
   } finally {
     $('save').disabled = false;
     $('save').textContent = 'Save';
+  }
+};
+
+// ==================== XỬ LÝ POPUP LỊCH SỬ (HISTORY) ====================
+function closeHistory() {
+  $('historyModal').classList.remove('open');
+}
+
+$('hx').onclick = closeHistory;
+$('hClose').onclick = closeHistory;
+$('historyModal').onclick = e => { if (e.target ===$('historyModal')) closeHistory(); };
+
+$('viewHistory').onclick = async () => {
+  $('historyModal').classList.add('open');$('historyMsg').textContent = 'Đang tải dữ liệu từ database...';
+  $('historyBody').innerHTML = '';
+
+  if (!db) {
+    $('historyMsg').textContent = 'Không có kết nối database.';
+    return;
+  }
+
+  try {
+    const { data, error } = await db
+      .from('exchange_rates')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      $('historyMsg').textContent = 'Không có lịch sử nào được ghi nhận.';
+      return;
+    }
+
+    $('historyMsg').textContent = `Tổng cộng: ${data.length} lần cập nhật (mới nhất hiển thị ở trên cùng).`;
+
+    let html = '';
+    data.forEach(item => {
+      const d = new Date(item.updated_at);
+      const timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + d.toLocaleDateString('vi-VN');
+      
+      html += `<tr>
+        <td style="text-align:left;white-space:nowrap">${timeStr}</td>
+        <td style="text-align:left"><b>${esc(item.editor)}</b></td>
+        <td style="text-align:center">${item.valid_until}</td>
+        <td>${item.usd}</td>
+        <td>${item.eur}</td>
+        <td>${item.cny}</td>
+        <td>${item.jpy}</td>
+      </tr>`;
+    });
+
+    $('historyBody').innerHTML = html;
+  } catch (err) {
+    console.error('Lỗi tải lịch sử:', err);
+    $('historyMsg').textContent = 'Lỗi khi tải lịch sử: ' + (err.message || 'Không rõ nguyên nhân');
   }
 };
 
