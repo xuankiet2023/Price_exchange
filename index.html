@@ -1,13 +1,11 @@
-HTML
-
 <!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Price Calculator</title>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client v2 chính thức hỗ trợ publishable key mới -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1/dist/umd/supabase.min.js"></script>
   <style>
     *{box-sizing:border-box}body{margin:0;background:#eef2f5;font-family:Arial,sans-serif;color:#1f2937}.bar{height:8px;background:linear-gradient(90deg,#e20015,#ffb500,#78be20,#00a8e0,#005691,#50237f)}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid #d7dde3;border-radius:8px;box-shadow:0 4px 16px #0001;overflow:hidden}section{padding:20px;border-bottom:1px solid #e5e7eb}h1{font-size:26px;margin:0 0 6px}h2{font-size:16px;margin:0 0 14px}.sub,.meta{font-size:12px;color:#66717e}.rates{display:grid;grid-template-columns:repeat(4,1fr);max-width:640px;border:1px solid #7b8794}.rate{border-right:1px solid #7b8794}.rate:last-child{border:0}.rate label{display:block;padding:7px 10px;background:#edf3f6;font-size:12px;font-weight:bold;border-bottom:1px solid #7b8794}.rate input{width:100%;border:0;padding:10px;text-align:right;background:#eef1f3;color:#59636f}.grid{display:grid;grid-template-columns:repeat(3,1fr) 130px 130px;gap:12px}.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:6px;min-height:28px}.field input,.field select{width:100%;height:42px;border:1px solid #8f9aa6;border-radius:3px;padding:0 10px;font-size:15px}.price{background:#e7e5d2}.source{outline:3px solid #007bc055;outline-offset:-3px;background:#fff}.formula{font-size:11px;color:#66717e;margin-top:5px}.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}button{height:42px;border:0;border-radius:3px;padding:0 20px;background:#007bc0;color:#fff;font-weight:bold;cursor:pointer}.secondary{background:#64717d}.output-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.output-row .field{width:180px}.output-row #reset{margin-left:auto;min-width:110px}.msg{display:none;margin-top:12px;padding:10px;border-radius:4px;font-size:13px}.msg.ok{display:block;background:#edf9f2;color:#146c3b}.msg.err{display:block;background:#fff1f2;color:#a31224}.results{display:none}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aab3bd;padding:9px;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#edf3f6;font-size:12px}.yellow{background:#fff200;font-weight:bold}.modalbg{display:none;position:fixed;inset:0;background:#0f172a99;z-index:10;align-items:center;justify-content:center;padding:16px}.modalbg.open{display:flex}.modal{width:min(680px,100%);background:#fff;border-radius:8px;overflow:hidden}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #ddd}.modalbody{padding:20px}.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.close{background:transparent;color:#333;font-size:24px;padding:0;width:35px}.expired{color:#b42318;font-weight:bold}@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.rates{grid-template-columns:1fr 1fr}.modalgrid{grid-template-columns:1fr}}@media(max-width:520px){.grid,.rates{grid-template-columns:1fr}.output-row .field{width:calc(100% - 130px)}}
   </style>
@@ -28,7 +26,7 @@ HTML
       </div>
       <div class="tools">
         <button id="updateRates">Update exchange rate</button>
-        <span class="meta" id="rateMeta">Đang đồng bộ dữ liệu...</span>
+        <span class="meta" id="rateMeta">Đang tải dữ liệu...</span>
       </div>
       <div id="message" class="msg"></div>
     </section>
@@ -144,9 +142,10 @@ HTML
 </div>
 
 <script>
+// CẤU HÌNH SUPABASE
 const SUPABASE_URL = 'https://qdcjaeankotcwqetytte.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_rkSo7xmKMh5ji7ycgRnH7A_yeT91mwl';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const $ = x => document.getElementById(x);
 const PASSWORD = '68686868';
@@ -266,7 +265,6 @@ function meta(data) {
   }
   const expired = new Date(data.valid + 'T23:59:59') < new Date();
   
-  // Định dạng ngày giờ cập nhật
   let timeStr = '';
   if (data.updatedAt) {
     const d = new Date(data.updatedAt);
@@ -277,32 +275,44 @@ function meta(data) {
   $('rateTitle').textContent = 'Exchange Rate · Valid until ' + data.valid;
 }
 
-// LẤY DỮ LIỆU MỚI NHẤT DỰA TRÊN THỜI GIAN UPDATED_AT
+// LẤY DỮ LIỆU MỚI NHẤT DỰA TRÊN THỜI GIAN
 async function restore() {
+  if (!db) {
+    $('rateMeta').textContent = 'Không thể tải thư viện kết nối Database.';
+    return;
+  }
+
   try {
     const { data, error } = await db
       .from('exchange_rates')
       .select('*')
-      .order('updated_at', { ascending: false }) // Sắp xếp giảm dần theo thời gian
-      .limit(1) // Lấy dòng mới nhất
-      .maybeSingle();
+      .order('updated_at', { ascending: false })
+      .limit(1);
 
-    if (error) throw error;
-    if (data) {
-      $('rateUSD').value = data.usd;
-      $('rateEUR').value = data.eur;
-      $('rateCNY').value = data.cny;
-      $('rateJPY').value = data.jpy;
+    if (error) {
+      console.error('Lỗi truy vấn Supabase:', error);
+      $('rateMeta').innerHTML = '<span style="color:#a31224">Lỗi database: ' + esc(error.message) + '</span>';
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const item = data[0];
+      $('rateUSD').value = item.usd;
+      $('rateEUR').value = item.eur;
+      $('rateCNY').value = item.cny;
+      $('rateJPY').value = item.jpy;
       meta({ 
-        editor: data.editor, 
-        valid: data.valid_until,
-        updatedAt: data.updated_at 
+        editor: item.editor, 
+        valid: item.valid_until,
+        updatedAt: item.updated_at 
       });
       update();
+    } else {
+      $('rateMeta').textContent = 'Bảng database chưa có dữ liệu mẫu.';
     }
   } catch (err) {
-    console.error('Lỗi khi tải từ Supabase:', err);
-    $('rateMeta').textContent = 'Chưa kết nối được database.';
+    console.error('Lỗi ngoại lệ restore():', err);
+    $('rateMeta').textContent = 'Lỗi kết nối: ' + (err.message || 'Không thể đồng bộ');
   }
 }
 
@@ -328,7 +338,7 @@ $('x').onclick = closeModal;
 $('cancel').onclick = closeModal;
 $('modal').onclick = e => { if (e.target === $('modal')) closeModal(); };
 
-// THÊM BẢN GHI MỚI VÀ LƯU THỜI GIAN HIỆN TẠI
+// THÊM DÒNG MỚI VÀO SUPABASE
 $('save').onclick = async () => {
   const editor = $('editor').value.trim();
   const valid = $('valid').value;
@@ -368,9 +378,16 @@ $('save').onclick = async () => {
     msg('Đã lưu vào database.', 'ok');
   } catch (err) {
     console.error('Lỗi khi lưu Supabase:', err);
-    modalMsg('Lỗi: ' + (err.message || 'Không thể lưu'), 'err');
+    modalMsg('Lỗi: ' + (err.message || 'Không thể lưu vào database'), 'err');
   } finally {
     $('save').disabled = false;
     $('save').textContent = 'Save';
   }
 };
+
+// Khởi chạy khi load trang
+restore();
+update();
+</script>
+</body>
+</html>
