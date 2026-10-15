@@ -4,12 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Price Calculator</title>
-  <!-- Supabase JS Client v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1/dist/umd/supabase.min.js"></script>
   <style>
     *{box-sizing:border-box}body{margin:0;background:#eef2f5;font-family:Arial,sans-serif;color:#1f2937}.bar{height:8px;background:linear-gradient(90deg,#e20015,#ffb500,#78be20,#00a8e0,#005691,#50237f)}main{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border:1px solid #d7dde3;border-radius:8px;box-shadow:0 4px 16px #0001;overflow:hidden}section{padding:20px;border-bottom:1px solid #e5e7eb}h1{font-size:26px;margin:0 0 6px}h2{font-size:16px;margin:0 0 14px}.sub,.meta{font-size:12px;color:#66717e}.rates{display:grid;grid-template-columns:repeat(4,1fr);max-width:640px;border:1px solid #7b8794}.rate{border-right:1px solid #7b8794}.rate:last-child{border:0}.rate label{display:block;padding:7px 10px;background:#edf3f6;font-size:12px;font-weight:bold;border-bottom:1px solid #7b8794}.rate input{width:100%;border:0;padding:10px;text-align:right;background:#eef1f3;color:#59636f}.grid{display:grid;grid-template-columns:repeat(3,1fr) 130px 130px;gap:12px}.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:6px;min-height:28px}.field input,.field select{width:100%;height:42px;border:1px solid #8f9aa6;border-radius:3px;padding:0 10px;font-size:15px}.price{background:#e7e5d2}.source{outline:3px solid #007bc055;outline-offset:-3px;background:#fff}.formula{font-size:11px;color:#66717e;margin-top:5px}.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}button{height:42px;border:0;border-radius:3px;padding:0 20px;background:#007bc0;color:#fff;font-weight:bold;cursor:pointer}.secondary{background:#64717d}.output-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.output-row .field{width:180px}.output-row #reset{margin-left:auto;min-width:110px}.msg{display:none;margin-top:12px;padding:10px;border-radius:4px;font-size:13px}.msg.ok{display:block;background:#edf9f2;color:#146c3b}.msg.err{display:block;background:#fff1f2;color:#a31224}.results{display:none}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aab3bd;padding:9px;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#edf3f6;font-size:12px}.yellow{background:#fff200;font-weight:bold}.modalbg{display:none;position:fixed;inset:0;background:#0f172a99;z-index:10;align-items:center;justify-content:center;padding:16px}.modalbg.open{display:flex}.modal{width:min(680px,100%);background:#fff;border-radius:8px;overflow:hidden}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #ddd}.modalbody{padding:20px}.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.close{background:transparent;color:#333;font-size:24px;padding:0;width:35px}.expired{color:#b42318;font-weight:bold}
     
-    /* Style bổ sung cho bảng Modal Lịch sử cuộn được */
     .history-modal{width:min(860px,100%)}
     .history-scroll{max-height:400px;overflow-y:auto;border:1px solid #aab3bd;margin-top:10px}
     .history-scroll table{margin:0;border:0}
@@ -130,7 +127,7 @@
   </div>
 </main>
 
-<!-- MODAL CẬP NHẬT TỶ GIÁ -->
+<!-- MODAL UPDATE -->
 <div class="modalbg" id="modal">
   <div class="modal">
     <div class="modalhead">
@@ -155,7 +152,7 @@
   </div>
 </div>
 
-<!-- MODAL XEM LỊCH SỬ CÓ SCROLL -->
+<!-- MODAL LỊCH SỬ -->
 <div class="modalbg" id="historyModal">
   <div class="modal history-modal">
     <div class="modalhead">
@@ -188,10 +185,16 @@
 </div>
 
 <script>
-// CẤU HÌNH SUPABASE TRỰC TIẾP
+// CẤU HÌNH SUPABASE REST API TRỰC TIẾP (Không bị lỗi phụ thuộc CDN)
 const SUPABASE_URL = 'https://qdcjaeankotcwqetytte.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_rkSo7xmKMh5ji7ycgRnH7A_yeT91mwl';
-const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
 
 const $ = x => document.getElementById(x);
 const PASSWORD = '68686868';
@@ -281,7 +284,7 @@ $('inputCur').addEventListener('change', () => {
 });
 $('outputCur').addEventListener('change', update);$('cp').addEventListener('change', update);
 
-// NÚT RESET: ĐƯA TẤT CẢ VỀ TRỐNG
+// NÚT RESET
 $('reset').onclick = () => {
   fields.forEach(x => {
     $(x).value = '';$(x).classList.remove('source');
@@ -320,25 +323,18 @@ function meta(data) {
   $('rateTitle').textContent = 'Exchange Rate · Valid until ' + data.valid;
 }
 
-// LẤY DỮ LIỆU TỶ GIÁ MỚI NHẤT
+// HÀM LẤY DỮ LIỆU TỶ GIÁ MỚI NHẤT QUA FETCH
 async function restore() {
-  if (!db) {
-    $('rateMeta').textContent = 'Không thể tải thư viện kết nối Database.';
-    return;
-  }
-
   try {
-    const { data, error } = await db
-      .from('exchange_rates')
-      .select('*')
-      .order('updated_at', { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error('Lỗi truy vấn Supabase:', error);
-      $('rateMeta').innerHTML = '<span style="color:#a31224">Lỗi database: ' + esc(error.message) + '</span>';
-      return;
+    const url = `${SUPABASE_URL}/rest/v1/exchange_rates?select=*&order=updated_at.desc&limit=1`;
+    const res = await fetch(url, { headers });
+    
+    if (!res.ok) {
+      const errDetail = await res.text();
+      throw new Error(`Mã lỗi HTTP ${res.status}: ${errDetail}`);
     }
+
+    const data = await res.json();
 
     if (data && data.length > 0) {
       const item = data[0];
@@ -353,11 +349,11 @@ async function restore() {
       });
       update();
     } else {
-      $('rateMeta').textContent = 'Bảng database chưa có dữ liệu mẫu.';
+      $('rateMeta').textContent = 'Chưa có dữ liệu tỷ giá trong database.';
     }
   } catch (err) {
-    console.error('Lỗi ngoại lệ restore():', err);
-    $('rateMeta').textContent = 'Lỗi kết nối: ' + (err.message || 'Không thể đồng bộ');
+    console.error('Lỗi restore:', err);
+    $('rateMeta').innerHTML = `<span style="color:#a31224">${err.message}</span>`;
   }
 }
 
@@ -366,6 +362,7 @@ function closeModal() {
   clearModalMsg();
 }
 
+// BẬT MODAL UPDATE
 $('updateRates').onclick = () => {
   const pw = prompt('Nhập mật khẩu để cập nhật Exchange Rate:');
   if (pw !== PASSWORD) {
@@ -382,7 +379,7 @@ $('x').onclick = closeModal;
 $('cancel').onclick = closeModal;
 $('modal').onclick = e => { if (e.target ===$('modal')) closeModal(); };
 
-// LƯU CẬP NHẬT LÊN DATABASE
+// LƯU CẬP NHẬT QUA FETCH
 $('save').onclick = async () => {
   const editor = $('editor').value.trim();
   const valid = $('valid').value;
@@ -397,23 +394,28 @@ $('save').onclick = async () => {
   $('save').textContent = 'Đang lưu...';
 
   const currentTime = new Date().toISOString();
+  const body = [{
+    editor: editor,
+    valid_until: valid,
+    usd: r.USD,
+    eur: r.EUR,
+    cny: r.CNY,
+    jpy: r.JPY,
+    updated_at: currentTime
+  }];
 
   try {
-    const { error } = await db
-      .from('exchange_rates')
-      .insert([
-        {
-          editor: editor,
-          valid_until: valid,
-          usd: r.USD,
-          eur: r.EUR,
-          cny: r.CNY,
-          jpy: r.JPY,
-          updated_at: currentTime
-        }
-      ]);
+    const url = `${SUPABASE_URL}/rest/v1/exchange_rates`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body)
+    });
 
-    if (error) throw error;
+    if (!res.ok) {
+      const errDetail = await res.text();
+      throw new Error(errDetail);
+    }
 
     rateCodes.forEach(c => $('rate' + c).value = r[c]);
     meta({ editor, valid, updatedAt: currentTime });
@@ -421,15 +423,15 @@ $('save').onclick = async () => {
     closeModal();
     msg('Đã lưu vào database.', 'ok');
   } catch (err) {
-    console.error('Lỗi khi lưu Supabase:', err);
-    modalMsg('Lỗi: ' + (err.message || 'Không thể lưu vào database'), 'err');
+    console.error('Lỗi lưu Supabase:', err);
+    modalMsg('Lỗi: ' + (err.message || 'Không thể lưu'), 'err');
   } finally {
     $('save').disabled = false;
     $('save').textContent = 'Save';
   }
 };
 
-// ==================== XỬ LÝ POPUP LỊCH SỬ (HISTORY) ====================
+// ==================== XỬ LÝ LỊCH SỬ (HISTORY) ====================
 function closeHistory() {
   $('historyModal').classList.remove('open');
 }
@@ -442,25 +444,20 @@ $('viewHistory').onclick = async () => {
   $('historyModal').classList.add('open');$('historyMsg').textContent = 'Đang tải dữ liệu từ database...';
   $('historyBody').innerHTML = '';
 
-  if (!db) {
-    $('historyMsg').textContent = 'Không có kết nối database.';
-    return;
-  }
-
   try {
-    const { data, error } = await db
-      .from('exchange_rates')
-      .select('*')
-      .order('updated_at', { ascending: false });
+    const url = `${SUPABASE_URL}/rest/v1/exchange_rates?select=*&order=updated_at.desc`;
+    const res = await fetch(url, { headers });
 
-    if (error) throw error;
+    if (!res.ok) throw new Error(await res.text());
+
+    const data = await res.json();
 
     if (!data || data.length === 0) {
       $('historyMsg').textContent = 'Không có lịch sử nào được ghi nhận.';
       return;
     }
 
-    $('historyMsg').textContent = `Tổng cộng: ${data.length} lần cập nhật (mới nhất hiển thị ở trên cùng).`;
+    $('historyMsg').textContent = `Tổng cộng: ${data.length} lần cập nhật (mới nhất ở trên cùng).`;
 
     let html = '';
     data.forEach(item => {
