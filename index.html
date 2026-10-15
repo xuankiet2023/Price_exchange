@@ -348,7 +348,7 @@ $('save').onclick = async () => {
     meta({ editor, valid });
     update();
     closeModal();
-    msg('Đã cập nhật tỷ giá thành công lên Supabase.', 'ok');
+    msg('Đã cập nhật tỷ giá thành công.', 'ok');
   } catch (err) {
     console.error('Lỗi khi lưu Supabase:', err);
     modalMsg('Lỗi: ' + (err.message || 'Không thể lưu'), 'err');
